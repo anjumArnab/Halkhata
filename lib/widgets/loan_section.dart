@@ -50,12 +50,12 @@ class LoanSection extends StatelessWidget {
                         borderRadius: BorderRadius.circular(32),
                       ),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.add),
-                        const SizedBox(width: 4),
-                        const Text('নতুন'),
+                        Icon(Icons.add),
+                        SizedBox(width: 4),
+                        Text('নতুন'),
                       ],
                     ),
                   ),
