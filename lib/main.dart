@@ -1,0 +1,30 @@
+import 'package:flutter/material.dart';
+import 'package:halkhata/screens/homepage.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Halkhata',
+      theme: ThemeData(
+        primaryColor: const Color(0xFF1A6C1A),
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: const Color(0xFF1A6C1A),
+          secondary: const Color(0xFFFFC107),
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF9EFD7),
+        fontFamily: 'BengaliFont',
+      ),
+      home: const HomePage(),
+    );
+  }
+}
+
