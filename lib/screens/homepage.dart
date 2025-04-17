@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:halkhata/models/loan_record.dart';
 import 'package:halkhata/widgets/custom_app_bar.dart';
 import 'package:halkhata/widgets/loan_section.dart';
-import 'package:halkhata/widgets/custom_text_form_field.dart';
+import 'package:halkhata/widgets/custom_text_form_field.dart'; // Import the custom widget
 import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
