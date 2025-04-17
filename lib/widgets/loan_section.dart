@@ -7,6 +7,7 @@ class LoanSection extends StatelessWidget {
   final List<LoanRecord> loansList;
   final IconData iconData;
   final Color iconColor;
+  final Color addButtonColor;
   final VoidCallback onAddPressed;
   final Function(int) onItemPressed;
 
@@ -16,6 +17,7 @@ class LoanSection extends StatelessWidget {
     required this.loansList,
     required this.iconData,
     required this.iconColor,
+    required this.addButtonColor,
     required this.onAddPressed,
     required this.onItemPressed,
   });
@@ -29,7 +31,13 @@ class LoanSection extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(iconData, color: iconColor),
+                Icon(
+                  // Update icons based on section
+                  title == 'ঋণ নিয়েছি' 
+                    ? Icons.arrow_downward 
+                    : Icons.arrow_upward,
+                  color: iconColor,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   title,
@@ -44,7 +52,7 @@ class LoanSection extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: onAddPressed,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1B6D3D),
+                      backgroundColor: addButtonColor, // Use the provided color
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32),
@@ -64,36 +72,133 @@ class LoanSection extends StatelessWidget {
             ),
             Expanded(
               child: loansList.isEmpty
-                  ? const Center(child: Text('কোন ঋণ নেই'))
+                  ? const SizedBox(height: 15)
                   : ListView.builder(
                       itemCount: loansList.length,
                       itemBuilder: (context, index) {
                         final loan = loansList[index];
+                        bool isPaid = loan.remainingAmount <= 0;
                         return Card(
                           margin: const EdgeInsets.symmetric(
-                              vertical: 4, horizontal: 8),
-                          child: ListTile(
-                            title: Text(loan.name),
-                            subtitle: Text(
-                              'শেষ হালনাগাদ: ${DateFormat('dd এপ্রিল, yyyy').format(loan.date)}',
-                            ),
-                            trailing: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
+                              vertical: 8, horizontal: 0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      loan.name,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: title == 'ঋণ নিয়েছি'
+                                            ? Colors.blue
+                                            : const Color(0xFF1B6D3D),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '৳${loan.amount} (অবশিষ্ট: ৳${loan.remainingAmount})',
+                                        style: const TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              decoration: BoxDecoration(
-                                color: title == 'ঋণ নিয়েছি'
-                                    ? Colors.blue
-                                    : const Color(0xFF1B6D3D),
-                                borderRadius: BorderRadius.circular(20),
+                              
+                              // Display transaction history
+                              if (loan.transactions.isNotEmpty) 
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: loan.transactions.length,
+                                  itemBuilder: (context, i) {
+                                    final transaction = loan.transactions[i];
+                                    return Container(
+                                      margin: const EdgeInsets.only(left: 12),
+                                      decoration: const BoxDecoration(
+                                        border: Border(
+                                          left: BorderSide(
+                                            color: Colors.orange,
+                                            width: 2,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, 
+                                          vertical: 8
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              '৳${transaction.amount}',
+                                              style: const TextStyle(fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(
+                                              '(${DateFormat('MM/dd/yyyy').format(transaction.date)})',
+                                              style: const TextStyle(fontSize: 12),
+                                            ),
+                                            const Text('আমনি'),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              
+                              // Date and action row
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'শেষ হালনাগাদ: ${DateFormat('dd এপ্রিল, yyyy').format(loan.date)}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    isPaid 
+                                      ? OutlinedButton.icon(
+                                          onPressed: null,
+                                          icon: const Icon(Icons.check, color: Colors.green),
+                                          label: const Text(
+                                            'পরিশোধিত',
+                                            style: TextStyle(color: Colors.green),
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            side: const BorderSide(color: Colors.green),
+                                          ),
+                                        )
+                                      : OutlinedButton(
+                                          onPressed: () => onItemPressed(index),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: title == 'ঋণ নিয়েছি'
+                                                ? Colors.blue
+                                                : const Color(0xFF1B6D3D),
+                                          ),
+                                          child: const Text('কিস্তি যোগ করুন'),
+                                        ),
+                                  ],
+                                ),
                               ),
-                              child: Text(
-                                '৳${loan.amount} (অবশিষ্ট: ৳${loan.remainingAmount})',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            onTap: () => onItemPressed(index),
+                            ],
                           ),
                         );
                       },

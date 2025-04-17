@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:halkhata/screens/homepage.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const Halkhata());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Halkhata extends StatelessWidget {
+  const Halkhata({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

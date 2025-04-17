@@ -118,9 +118,11 @@ class _HomePageState extends State<HomePage> {
             loansList: loansReceived,
             iconData: Icons.arrow_downward,
             iconColor: Colors.blue,
+            addButtonColor: const Color(0xFF1B6D3D), // Green button
             onAddPressed: () => _showAddLoanDialog(true),
             onItemPressed: (index) =>
-                _showLoanDetails(loansReceived[index], true, index),
+                _showAddTransactionDialog(loansReceived[index], true, index)
+
           ),
 
           // Loans Given Section
@@ -129,10 +131,10 @@ class _HomePageState extends State<HomePage> {
             loansList: loansGiven,
             iconData: Icons.arrow_upward,
             iconColor: Colors.green,
+            addButtonColor: Colors.orange, // Orange button for loans given section
             onAddPressed: () => _showAddLoanDialog(false),
             onItemPressed: (index) =>
-                _showLoanDetails(loansGiven[index], false, index),
-          ),
+                _showAddTransactionDialog(loansGiven[index], false, index),)
         ],
       ),
     );
@@ -170,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                 Row(
                   children: [
                     Text(
-                      isReceived ? 'কিস্তি যোগ করুন' : 'নতুন ঋণ নেওয়া',
+                      isReceived ? 'নতুন ঋণ নেওয়া' : 'নতুন ঋণ দেওয়া',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -188,19 +190,18 @@ class _HomePageState extends State<HomePage> {
                   thickness: 2,
                 ),
                 const SizedBox(height: 8),
-                if (!isReceived) ...[
-                  const Text('ব্যক্তির নাম'),
-                  const SizedBox(height: 4),
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                // Person's name field is needed for both loan types
+                const Text('ব্যক্তির নাম'),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                ],
+                ),
+                const SizedBox(height: 12),
                 const Text('পরিমাণ'),
                 const SizedBox(height: 4),
                 TextField(
@@ -234,21 +235,21 @@ class _HomePageState extends State<HomePage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    suffixIcon: const Icon(Icons.calendar_today),
                   ),
                 ),
-                if (!isReceived) ...[
-                  const SizedBox(height: 12),
-                  const Text('শেয়ার করুন (ঐচ্ছিক)'),
-                  const SizedBox(height: 4),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: 'ইমেইল দিয়ে খুঁজুন',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                // Share option appears for both loan types
+                const SizedBox(height: 12),
+                const Text('শেয়ার করুন (ঐচ্ছিক)'),
+                const SizedBox(height: 4),
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'ইমেইল দিয়ে খুঁজুন',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                ],
+                ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
@@ -261,12 +262,12 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     onPressed: () {
-                      if (nameController.text.isNotEmpty || isReceived) {
+                      if (nameController.text.isNotEmpty) {
                         final amount =
                             double.tryParse(amountController.text) ?? 0;
                         if (amount > 0) {
                           final newLoan = LoanRecord(
-                            name: isReceived ? 'Unknown' : nameController.text,
+                            name: nameController.text,
                             amount: amount,
                             date: DateFormat('MM/dd/yyyy')
                                 .parse(dateController.text),
@@ -304,252 +305,127 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showLoanDetails(LoanRecord loan, bool isReceived, int index) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+void _showAddTransactionDialog(LoanRecord loan, bool isReceived, int index) {
+  final amountController = TextEditingController();
+  final dateController = TextEditingController(
+    text: DateFormat('MM/dd/yyyy').format(DateTime.now()),
+  );
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFF1B6D3D),
-                width: 2,
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'ঋণ বিবরণ: ${loan.name}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                const Divider(
-                  color: Color(0xFFDAA520),
-                  thickness: 2,
-                ),
-                const SizedBox(height: 16),
-                RichText(
-                  text: TextSpan(
-                    style: const TextStyle(color: Colors.black),
-                    children: [
-                      const TextSpan(
-                        text: 'মোট পরিমাণ: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: '৳${loan.amount}'),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                RichText(
-                  text: TextSpan(
-                    style: const TextStyle(color: Colors.black),
-                    children: [
-                      const TextSpan(
-                        text: 'অবশিষ্ট পরিমাণ: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: '৳${loan.remainingAmount}'),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                RichText(
-                  text: TextSpan(
-                    style: const TextStyle(color: Colors.black),
-                    children: [
-                      const TextSpan(
-                        text: 'তারিখ: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                          text: DateFormat('MM/dd/yyyy').format(loan.date)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (loan.transactions.isNotEmpty) ...[
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   const Text(
-                    'লেনদেন:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    'কিস্তি যোগ করুন',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1B6D3D),
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: loan.transactions.length,
-                    itemBuilder: (context, i) {
-                      final transaction = loan.transactions[i];
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.check_circle_outline),
-                        title: Text('৳${transaction.amount}'),
-                        subtitle: Text(
-                            DateFormat('MM/dd/yyyy').format(transaction.date)),
-                        trailing: const Text('আপনি'),
-                      );
-                    },
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
                   ),
                 ],
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1B6D3D),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () {
-                      _showAddTransactionDialog(loan, isReceived, index);
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'কিস্তি যোগ করুন',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showAddTransactionDialog(LoanRecord loan, bool isReceived, int index) {
-    final amountController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFF1B6D3D),
-                width: 2,
               ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      'কিস্তি যোগ করুন',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
+              const SizedBox(height: 16),
+              const Text('পরিমাণ'),
+              const SizedBox(height: 4),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                const Divider(
-                  color: Color(0xFFDAA520),
-                  thickness: 2,
+              ),
+              const SizedBox(height: 12),
+              const Text('তারিখ'),
+              const SizedBox(height: 4),
+              TextField(
+                controller: dateController,
+                readOnly: true,
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (date != null) {
+                    dateController.text =
+                        DateFormat('MM/dd/yyyy').format(date);
+                  }
+                },
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  suffixIcon: const Icon(Icons.calendar_today),
                 ),
-                const SizedBox(height: 16),
-                const Text('পরিমাণ'),
-                const SizedBox(height: 4),
-                TextField(
-                  controller: amountController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1B6D3D),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  onPressed: () {
+                    final amount =
+                        double.tryParse(amountController.text) ?? 0;
+                    if (amount > 0 && amount <= loan.remainingAmount) {
+                      setState(() {
+                        List<LoanRecord> targetList = isReceived ? loansReceived : loansGiven;
+
+                        targetList[index].transactions.add(
+                          Transaction(
+                            amount: amount,
+                            date: DateFormat('MM/dd/yyyy')
+                              .parse(dateController.text),
+                          ),
+                        );
+
+                        targetList[index].remainingAmount -= amount;
+                      });
+
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text(
+                    'সংরক্ষণ করুন',
+                    style: TextStyle(
+                      fontSize: 16,
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1B6D3D),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () {
-                      final amount =
-                          double.tryParse(amountController.text) ?? 0;
-                      if (amount > 0 && amount <= loan.remainingAmount) {
-                        setState(() {
-                          List<LoanRecord> targetList;
-                          if (isReceived) {
-                            targetList = loansReceived;
-                          } else {
-                            targetList = loansGiven;
-                          }
-
-                          targetList[index].transactions.add(
-                                Transaction(
-                                  amount: amount,
-                                  date: DateTime.now(),
-                                ),
-                              );
-
-                          targetList[index].remainingAmount -= amount;
-                        });
-
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: const Text(
-                      'সংরক্ষণ করুন',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 }
