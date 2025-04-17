@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:halkhata/models/loan_record.dart';
 import 'package:halkhata/widgets/custom_app_bar.dart';
 import 'package:halkhata/widgets/loan_section.dart';
+import 'package:halkhata/widgets/custom_text_form_field.dart';
 import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
@@ -197,6 +198,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     final dateController = TextEditingController(
       text: DateFormat('MM/dd/yyyy').format(DateTime.now()),
     );
+    final shareController = TextEditingController();
 
     showDialog(
       context: context,
@@ -244,32 +246,33 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 // Person's name field is needed for both loan types
                 const Text('ব্যক্তির নাম'),
                 const SizedBox(height: 4),
-                TextField(
+                CustomTextFormField(
                   controller: nameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  hintText: 'নাম লিখুন',
                 ),
                 const SizedBox(height: 12),
                 const Text('পরিমাণ'),
                 const SizedBox(height: 4),
-                TextField(
+                CustomTextFormField(
                   controller: amountController,
+                  hintText: 'পরিমাণ লিখুন',
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 12),
                 const Text('তারিখ'),
                 const SizedBox(height: 4),
-                TextField(
+                CustomTextFormField(
                   controller: dateController,
-                  readOnly: true,
+                  hintText: 'তারিখ নির্বাচন করুন',
+                  suffixIcon: const Icon(Icons.calendar_today),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'তারিখ আবশ্যক';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.none,
+                ).buildGestureDetector(
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -278,28 +281,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       lastDate: DateTime(2100),
                     );
                     if (date != null) {
-                      dateController.text =
-                          DateFormat('MM/dd/yyyy').format(date);
+                      dateController.text = DateFormat('MM/dd/yyyy').format(date);
                     }
                   },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    suffixIcon: const Icon(Icons.calendar_today),
-                  ),
                 ),
                 // Share option appears for both loan types
                 const SizedBox(height: 12),
                 const Text('শেয়ার করুন (ঐচ্ছিক)'),
                 const SizedBox(height: 4),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'ইমেইল দিয়ে খুঁজুন',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                CustomTextFormField(
+                  controller: shareController,
+                  hintText: 'ইমেইল দিয়ে খুঁজুন',
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
@@ -401,21 +393,26 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 const SizedBox(height: 16),
                 const Text('পরিমাণ'),
                 const SizedBox(height: 4),
-                TextField(
+                CustomTextFormField(
                   controller: amountController,
+                  hintText: 'পরিমাণ লিখুন',
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 12),
                 const Text('তারিখ'),
                 const SizedBox(height: 4),
-                TextField(
+                CustomTextFormField(
                   controller: dateController,
-                  readOnly: true,
+                  hintText: 'তারিখ নির্বাচন করুন',
+                  suffixIcon: const Icon(Icons.calendar_today),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'তারিখ আবশ্যক';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.none,
+                ).buildGestureDetector(
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -424,16 +421,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       lastDate: DateTime(2100),
                     );
                     if (date != null) {
-                      dateController.text =
-                          DateFormat('MM/dd/yyyy').format(date);
+                      dateController.text = DateFormat('MM/dd/yyyy').format(date);
                     }
                   },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    suffixIcon: const Icon(Icons.calendar_today),
-                  ),
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -481,6 +471,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         );
       },
+    );
+  }
+}
+
+// Extension for CustomTextFormField to handle date picker
+extension CustomTextFormFieldGestureDetector on CustomTextFormField {
+  Widget buildGestureDetector({required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AbsorbPointer(
+        child: this,
+      ),
     );
   }
 }
