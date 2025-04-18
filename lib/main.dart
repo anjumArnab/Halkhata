@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:halkhata/screens/homepage.dart';
 
 void main() async {
-
   runApp(const Halkhata());
 }
 

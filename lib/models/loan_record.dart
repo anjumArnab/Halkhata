@@ -1,3 +1,4 @@
+// loan_record.dart
 class LoanRecord {
   final String id;
   final String name;
