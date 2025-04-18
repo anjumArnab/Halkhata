@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:halkhata/screens/homepage.dart';
+import 'package:halkhata/screens/login_page.dart';
 
 void main() async {
   runApp(const Halkhata());
@@ -22,7 +22,7 @@ class Halkhata extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFF9EFD7),
         fontFamily: 'BengaliFont',
       ),
-      home: const HomePage(),
+      home: const LoginPage(),
     );
   }
 }

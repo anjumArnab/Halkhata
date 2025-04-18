@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:halkhata/screens/homepage.dart';
 import 'package:halkhata/screens/registration_page.dart';
 import 'package:halkhata/widgets/custom_app_bar.dart';
 import 'package:halkhata/widgets/custom_button.dart';
@@ -129,6 +130,11 @@ class _LoginPageState extends State<LoginPage> {
   // Mock functions for handling dynamic behaviors
   void _handleLogin() {
     // This would authenticate the user against a backend service
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const HomePage(),
+      ),
+    );
     
   }
 
