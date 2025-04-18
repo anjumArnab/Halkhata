@@ -1,17 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:halkhata/screens/homepage.dart';
-import 'package:halkhata/services/hive_db.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
-   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Hive - simpler approach
-  await Hive.initFlutter();
-  
-  // Initialize database service
-  await LoanDatabaseService.init();
-  
+
   runApp(const Halkhata());
 }
 
