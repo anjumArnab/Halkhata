@@ -135,7 +135,6 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context) => const HomePage(),
       ),
     );
-    
   }
 
   void _navigateToRegistration(BuildContext context) {
@@ -146,6 +145,5 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context) => const RegistrationPage(),
       ),
     );
-    
   }
 }
