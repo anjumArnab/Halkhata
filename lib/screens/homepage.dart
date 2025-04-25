@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:halkhata/models/loan_record.dart';
+import 'package:halkhata/models/transaction_record.dart';
 import 'package:halkhata/widgets/custom_app_bar.dart';
 import 'package:halkhata/widgets/installment_dialog.dart';
 import 'package:halkhata/widgets/loan_dialog.dart';
