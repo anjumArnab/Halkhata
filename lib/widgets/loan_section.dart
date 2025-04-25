@@ -126,13 +126,13 @@ class LoanSection extends StatelessWidget {
                                 ),
                                 
                                 // Display transaction history
-                                if (loan.transactions.isNotEmpty) 
+                                if (loan.transactions!.isNotEmpty) 
                                   ListView.builder(
                                     shrinkWrap: true,
                                     physics: const NeverScrollableScrollPhysics(),
-                                    itemCount: loan.transactions.length,
+                                    itemCount: loan.transactions!.length,
                                     itemBuilder: (context, i) {
-                                      final transaction = loan.transactions[i];
+                                      final transaction = loan.transactions![i];
                                       return GestureDetector(
                                     onPanUpdate: onPanUpdate, // RIGHT SWIPE TO DELETE THIS PARTICULAR TRANSACTION (HIVE DELETE OPERATION)
                                         child: Container(
