@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:halkhata/models/loan_record.dart';
-import 'package:halkhata/models/transaction_record.dart';
+import 'package:halkhata/services/loan_service.dart';
 import 'package:halkhata/widgets/custom_app_bar.dart';
 import 'package:halkhata/widgets/installment_dialog.dart';
 import 'package:halkhata/widgets/loan_dialog.dart';
@@ -16,19 +16,53 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
+  // LoanService
+  final LoanService _loanService = LoanService();
+  
+  // Data
   List<LoanRecord> loansReceived = [];
   List<LoanRecord> loansGiven = [];
-
+  
   double totalReceived = 0;
   double totalGiven = 0;
 
-  // Add TabController
+  // TabController
   late TabController _tabController;
-
+  bool _isLoading = true;
+  
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Initialize the loan service
+    await _loanService.init();
+    
+    // Load data
+    _loadData();
+    
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _loadData() {
+    setState(() {
+      // Get loans
+      loansReceived = _loanService.getLoansReceived();
+      loansGiven = _loanService.getLoansGiven();
+      
+      // Calculate totals
+      totalReceived = _loanService.calculateTotalReceived();
+      totalGiven = _loanService.calculateTotalGiven();
+    });
   }
 
   @override
@@ -39,15 +73,24 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    
     return Scaffold(
       appBar: CustomAppBar(
         showLogout: true,
         onLogout: () {
-          // handle logout
+          // Handle logout
         },
       ),
       body: Column(
         children: [
+          // Summary cards
           Container(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -131,7 +174,7 @@ class _HomePageState extends State<HomePage>
             ),
           ),
 
-          // Add TabBar
+          // TabBar
           Container(
             decoration: const BoxDecoration(
               border: Border(
@@ -159,7 +202,7 @@ class _HomePageState extends State<HomePage>
             ),
           ),
 
-          // Add TabBarView with LoanSections
+          // TabBarView with LoanSections
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -173,7 +216,10 @@ class _HomePageState extends State<HomePage>
                   addButtonColor: const Color(0xFF1B6D3D), // Green button
                   onAddPressed: () => _showAddLoanDialog(true),
                   onItemPressed: (index) => _showAddTransactionDialog(
-                      loansReceived[index], true, index),
+                    loansReceived[index],
+                    true,
+                    index,
+                  ),
                 ),
 
                 // Loans Given Tab
@@ -182,11 +228,13 @@ class _HomePageState extends State<HomePage>
                   loansList: loansGiven,
                   iconData: Icons.arrow_upward,
                   iconColor: Colors.green,
-                  addButtonColor:
-                      Colors.orange, // Orange button for loans given section
+                  addButtonColor: Colors.orange, // Orange button
                   onAddPressed: () => _showAddLoanDialog(false),
                   onItemPressed: (index) => _showAddTransactionDialog(
-                      loansGiven[index], false, index),
+                    loansGiven[index],
+                    false,
+                    index,
+                  ),
                 ),
               ],
             ),
@@ -212,30 +260,26 @@ class _HomePageState extends State<HomePage>
       amountController: amountController,
       dateController: dateController,
       shareController: shareController,
-    ).then((_) {
+    ).then((_) async {
       if (nameController.text.isNotEmpty) {
         final amount = double.tryParse(amountController.text) ?? 0;
         if (amount > 0) {
-          final newLoan = LoanRecord(
+          // Parse date
+          final date = DateFormat('MM/dd/yyyy').parse(dateController.text);
+          
+          // Create loan via service
+          await _loanService.createLoan(
             name: nameController.text,
             amount: amount,
-            date: DateFormat('MM/dd/yyyy').parse(dateController.text),
-            remainingAmount: amount,
+            date: date,
+            isReceived: isReceived,
           );
-
-          setState(() {
-            if (isReceived) {
-              loansReceived.add(newLoan);
-              totalReceived += amount;
-              // Switch to the first tab when adding a received loan
-              _tabController.animateTo(0);
-            } else {
-              loansGiven.add(newLoan);
-              totalGiven += amount;
-              // Switch to the second tab when adding a given loan
-              _tabController.animateTo(1);
-            }
-          });
+          
+          // Reload data
+          _loadData();
+          
+          // Switch to appropriate tab
+          _tabController.animateTo(isReceived ? 0 : 1);
         }
       }
     });
@@ -252,21 +296,21 @@ class _HomePageState extends State<HomePage>
       isReceived: isReceived,
       amountController: amountController,
       dateController: dateController,
-    ).then((_) {
+    ).then((_) async {
       final amount = double.tryParse(amountController.text) ?? 0;
       if (amount > 0 && amount <= loan.remainingAmount) {
-        setState(() {
-          List<LoanRecord> targetList = isReceived ? loansReceived : loansGiven;
-
-          targetList[index].transactions.add(
-                Transaction(
-                  amount: amount,
-                  date: DateFormat('MM/dd/yyyy').parse(dateController.text),
-                ),
-              );
-
-          targetList[index].remainingAmount -= amount;
-        });
+        // Parse date
+        final date = DateFormat('MM/dd/yyyy').parse(dateController.text);
+        
+        // Add transaction via service
+        await _loanService.addTransaction(
+          loan: loan,
+          amount: amount,
+          date: date,
+        );
+        
+        // Reload data
+        _loadData();
       }
     });
   }
