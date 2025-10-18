@@ -1,9 +1,9 @@
 # Halkhata
-Application to track loans.
+Application to track loans using **Hive** for secure local storage.
 
-## Screenshots
+## Preview
 
 
-![Give Loan](assets/t01.png)
-![Get Loan](assets/t02.png)
+![Halkhata](assets/halkhata.gif)
+
 
