@@ -1,4 +1,4 @@
-import '/models/sqflite_datamodels/transaction_record.dart';
+import 'transaction_record.dart' show TransactionRecord;
 
 class LoanRecord {
   final int? id;
